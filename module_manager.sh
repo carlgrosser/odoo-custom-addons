@@ -20,7 +20,7 @@ function safe_git_push() {
 function add_submodule() {
     read -rp "Enter GitHub repo URL (e.g. https://github.com/OCA/project): " repo_url
     read -rp "Enter folder name to clone into (e.g. project): " folder_name
-    read -rp "Enter branch (e.g. 17.0): " branch
+    read -rp "Enter branch (e.g. 18.0): " branch
 
     cd "$SUBMODULE_DIR" || exit
     git submodule add -b "$branch" "$repo_url" "$folder_name"
