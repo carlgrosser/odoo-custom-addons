@@ -5,37 +5,29 @@ This guide explains how to manage OCA modules in your unified Odoo addons reposi
 ---
 
 ## 📦 Repository Structure
-
 Your main repository is located at:
-
 ```
 /home/administrator/odoo-custom-addons
 ```
-
 Submodules (OCA repos) live under:
-
 ```
 /home/administrator/odoo-custom-addons/oca
 ```
-
-Activated modules (linked into Odoo's addons\_path) go here:
-
+Activated modules (linked into Odoo's addons_path) go here:
 ```
 /home/administrator/custom_addons
 ```
-
 ---
 
 ## 🚀 Quick Start (Install the CLI Script)
 
 Run this one-liner to install the module manager script:
-
 ```bash
-curl -o ~/module_manager.sh https://raw.githubusercontent.com/carlgrosser/odoo-custom-addons/main/module_manager.sh && chmod +x ~/module_manager.sh
+curl -o ~/module_manager.sh https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/odoo-custom-addons/main/module_manager.sh && chmod +x ~/module_manager.sh
 ```
+> ✅ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 Run the script anytime with:
-
 ```bash
 ~/module_manager.sh
 ```
@@ -43,7 +35,6 @@ Run the script anytime with:
 ---
 
 ## 💡 What the Script Can Do
-
 1. **Add a new OCA repository** as a Git submodule
 2. **List all available modules** from all submodules
 3. **Activate a module** (symlink it to `custom_addons` so Odoo sees it)
@@ -55,9 +46,7 @@ Run the script anytime with:
 ## ✅ Common Tasks
 
 ### 1. Add a New OCA Repo
-
 Choose option `1` in the script, then provide:
-
 - GitHub repo URL (e.g., `https://github.com/OCA/account-reconcile`)
 - Short folder name (e.g., `account_reconcile_oca`)
 - Branch (e.g., `17.0`)
@@ -67,23 +56,18 @@ This adds the OCA repo as a submodule and pushes it to GitHub.
 ---
 
 ### 2. Activate a Module
-
 Choose option `3`, then enter the path relative to the `oca/` folder.
 
 **Example:**
-
 ```
 account_reconcile_oca/account_reconcile
 ```
-
 This creates a symlink in `custom_addons` so Odoo can load it.
 
 ---
 
 ### 3. Update All Modules
-
 Choose option `4`. This will:
-
 - Pull the latest code from your repo and all submodules
 - Auto-commit changes
 - Push back to GitHub
@@ -91,23 +75,18 @@ Choose option `4`. This will:
 ---
 
 ### 4. Restart Odoo
-
 Choose option `5`. This runs:
-
 ```bash
 sudo systemctl restart odoo
 ```
-
 Make sure the user has appropriate `sudo` privileges.
 
 ---
 
 ## 🛠 Troubleshooting
-
 - **App not showing in Odoo?** Be sure the module is symlinked or copied into a directory listed in `addons_path`.
 - **Permission denied?** Ensure your user can run `systemctl restart odoo` or edit the script to skip restarting.
 - **Submodule didn’t clone?** Run:
-
 ```bash
 git submodule update --init --recursive
 ```
@@ -115,12 +94,62 @@ git submodule update --init --recursive
 ---
 
 ## 📁 Where to Put This Guide
-
 Place this file in the root of your GitHub repo as `USER_GUIDE.md`. GitHub will render it automatically for easy reading.
 
 ---
 
 ## 🙋‍♀️ Need Help?
-
 If in doubt, open an issue in the repo or ping your team lead!
+
+---
+
+# 📝 Quick Reference Cheat Sheet
+
+### 🔧 Install Script
+```bash
+curl -o ~/module_manager.sh https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/odoo-custom-addons/main/module_manager.sh && chmod +x ~/module_manager.sh
+```
+
+### ▶️ Run the Script
+```bash
+~/module_manager.sh
+```
+
+### ✅ Menu Options
+1. **Add Submodule**
+   - URL: https://github.com/OCA/repo-name
+   - Folder name: something_descriptive
+   - Branch: 17.0
+
+2. **List Modules** – shows available modules with valid manifests
+
+3. **Activate Module**
+   - Format: submodule_folder/module_name
+   - Example: `fieldservice/fieldservice_task`
+
+4. **Update All**
+   - Pulls latest from all submodules
+   - Auto-commits and pushes
+
+5. **Restart Odoo**
+   - Uses: `sudo systemctl restart odoo`
+
+---
+
+### 🛠 Commands Reference
+```bash
+git submodule update --init --recursive
+```
+```bash
+sudo systemctl restart odoo
+```
+
+### 📂 Addons Paths
+- Base repo: `/home/administrator/odoo-custom-addons`
+- Submodules: `/home/administrator/odoo-custom-addons/oca`
+- Active modules: `/home/administrator/custom_addons`
+
+---
+
+Stick this cheat sheet on your digital or physical wall — or print it out for quick access!
 
