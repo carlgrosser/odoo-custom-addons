@@ -8,6 +8,15 @@ function pause() {
     read -rp "Press Enter to continue..."
 }
 
+function safe_git_push() {
+    git push origin main
+    if [ $? -ne 0 ]; then
+        echo "🔁 Push failed. Attempting to rebase and retry..."
+        git pull origin main --rebase
+        git push origin main
+    fi
+}
+
 function add_submodule() {
     read -rp "Enter GitHub repo URL (e.g. https://github.com/OCA/project): " repo_url
     read -rp "Enter folder name to clone into (e.g. project): " folder_name
@@ -18,7 +27,7 @@ function add_submodule() {
     cd "$REPO_ROOT" || exit
     git add .
     git commit -m "Add submodule: $folder_name"
-    git push
+    safe_git_push
     echo "✅ Submodule added and pushed."
     pause
 }
@@ -63,12 +72,12 @@ function activate_module() {
 function update_all() {
     cd "$REPO_ROOT" || exit
     echo "🔄 Pulling main repo..."
-    git pull
+    git pull origin main --rebase
     echo "🔄 Updating submodules..."
     git submodule update --remote --merge
     git add .
     git commit -am "Update submodules"
-    git push
+    safe_git_push
     echo "✅ All modules updated."
     pause
 }
@@ -83,7 +92,7 @@ function remove_submodule() {
 
     git add .
     git commit -m "Remove submodule: $folder_name"
-    git push
+    safe_git_push
     echo "✅ Submodule removed."
 
     echo "🔍 Checking for activated modules to clean..."
