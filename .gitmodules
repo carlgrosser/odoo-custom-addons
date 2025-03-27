@@ -2,3 +2,7 @@
 	path = oca/account_reconcile_oca
 	url = https://github.com/OCA/account-reconcile
 	branch = 18.0
+[submodule "oca/account_reconcile"]
+	path = oca/account_reconcile
+	url = https://github.com/OCA/account-reconcile
+	branch = 18.0
