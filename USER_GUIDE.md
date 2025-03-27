@@ -31,10 +31,8 @@ Activated modules (linked into Odoo's addons\_path) go here:
 Run this one-liner to install the module manager script:
 
 ```bash
-curl -o ~/module_manager.sh https://raw.githubusercontent.com/YOUR_USERNAME/odoo-custom-addons/main/module_manager.sh && chmod +x ~/module_manager.sh
+curl -o ~/module_manager.sh https://raw.githubusercontent.com/carlgrosser/odoo-custom-addons/main/module_manager.sh && chmod +x ~/module_manager.sh
 ```
-
-> ✅ Replace `YOUR_USERNAME` with your actual GitHub username if needed.
 
 Run the script anytime with:
 
