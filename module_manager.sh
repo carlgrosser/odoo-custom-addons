@@ -108,7 +108,7 @@ function remove_submodule() {
 
 function restart_odoo() {
     echo "Restarting Odoo..."
-    sudo systemctl restart odoo
+    sudo systemctl restart odoo18
     echo "✅ Odoo restarted."
     pause
 }
