@@ -113,6 +113,15 @@ function restart_odoo() {
     pause
 }
 
+function sync_with_github() {
+    echo "🔄 Syncing with GitHub..."
+    cd "$REPO_ROOT" || exit
+    git pull origin main --rebase
+    git push origin main
+    echo "✅ GitHub sync complete."
+    pause
+}
+
 while true; do
     clear
     echo "==== Odoo Module Manager ===="
@@ -123,9 +132,10 @@ while true; do
     echo "5. Update all modules"
     echo "6. Remove a submodule"
     echo "7. Restart Odoo"
-    echo "8. Exit"
+    echo "8. Sync with GitHub (pull --rebase & push)"
+    echo "9. Exit"
     echo "=============================="
-    read -rp "Choose an option [1-8]: " choice
+    read -rp "Choose an option [1-9]: " choice
 
     case $choice in
         1) add_submodule ;;
@@ -135,7 +145,8 @@ while true; do
         5) update_all ;;
         6) remove_submodule ;;
         7) restart_odoo ;;
-        8) exit 0 ;;
+        8) sync_with_github ;;
+        9) exit 0 ;;
         *) echo "❌ Invalid option." && pause ;;
     esac
 done
