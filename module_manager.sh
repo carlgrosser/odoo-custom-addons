@@ -1,80 +1,132 @@
 #!/bin/bash
 
-REPO_DIR="/home/administrator/odoo-custom-addons"
-ACTIVE_DIR="/home/administrator/custom_addons"
-ODOO_SERVICE="odoo"
+REPO_ROOT="/home/administrator/odoo-custom-addons"
+SUBMODULE_DIR="$REPO_ROOT/oca"
+ACTIVE_ADDONS="/home/administrator/custom_addons"
 
-function add_submodule() {
-    echo "Enter the OCA GitHub repo URL (e.g., https://github.com/OCA/account-reconcile):"
-    read repo_url
-    echo "Enter a short name to use for this submodule (e.g., account_reconcile_oca):"
-    read module_dir
-    echo "Enter the branch (usually 17.0):"
-    read branch
-
-    cd "$REPO_DIR/oca" || mkdir -p "$REPO_DIR/oca" && cd "$REPO_DIR/oca"
-    git submodule add -b "$branch" "$repo_url" "$module_dir"
-    cd "$REPO_DIR"
-    git add .
-    git commit -m "Add submodule: $module_dir from $repo_url"
-    git push
-    echo "✅ Submodule added and pushed."
+function pause() {
+    read -rp "Press Enter to continue..."
 }
 
-function list_modules() {
-    echo "\n📦 Available modules in submodules:"
-    find "$REPO_DIR/oca" -type f -name "__manifest__.py" | sed "s|$REPO_DIR/oca/||" | cut -d/ -f1,2 | sort | uniq
-    echo ""
+function add_submodule() {
+    read -rp "Enter GitHub repo URL (e.g. https://github.com/OCA/project): " repo_url
+    read -rp "Enter folder name to clone into (e.g. project): " folder_name
+    read -rp "Enter branch (e.g. 17.0): " branch
+
+    cd "$SUBMODULE_DIR" || exit
+    git submodule add -b "$branch" "$repo_url" "$folder_name"
+    cd "$REPO_ROOT" || exit
+    git add .
+    git commit -m "Add submodule: $folder_name"
+    git push
+    echo "✅ Submodule added and pushed."
+    pause
+}
+
+function list_available_modules() {
+    echo "📦 Modules NOT yet activated:"
+    for subdir in "$SUBMODULE_DIR"/*; do
+        [ -d "$subdir" ] || continue
+        for module in "$subdir"/*; do
+            if [ -f "$module/__manifest__.py" ]; then
+                module_name=$(basename "$module")
+                if [ ! -L "$ACTIVE_ADDONS/$module_name" ]; then
+                    echo "$(basename "$subdir")/$module_name"
+                fi
+            fi
+        done
+    done
+    pause
+}
+
+function list_activated_modules() {
+    echo "✅ Currently activated modules:"
+    for link in "$ACTIVE_ADDONS"/*; do
+        [ -L "$link" ] && echo "$(basename "$link")"
+    done
+    pause
 }
 
 function activate_module() {
-    echo "Enter the relative path to the module (e.g., account_reconcile_oca/account_reconcile):"
-    read module_path
-    full_source="$REPO_DIR/oca/$module_path"
-    full_target="$ACTIVE_DIR/$(basename $module_path)"
-    if [ -d "$full_source" ]; then
-        mkdir -p "$ACTIVE_DIR"
-        ln -sf "$full_source" "$full_target"
-        echo "✅ Module activated: $full_target"
+    read -rp "Enter path relative to 'oca/' (e.g. fieldservice/fieldservice_task): " module_path
+    full_path="$SUBMODULE_DIR/$module_path"
+    module_name=$(basename "$module_path")
+    if [ -d "$full_path" ]; then
+        ln -sf "$full_path" "$ACTIVE_ADDONS/$module_name"
+        echo "✅ Module '$module_name' activated."
     else
-        echo "❌ Module not found: $full_source"
+        echo "❌ Module path not found."
     fi
+    pause
 }
 
 function update_all() {
-    echo "🔄 Pulling latest changes from main repo and submodules..."
-    cd "$REPO_DIR"
+    cd "$REPO_ROOT" || exit
+    echo "🔄 Pulling main repo..."
     git pull
+    echo "🔄 Updating submodules..."
     git submodule update --remote --merge
     git add .
-    git commit -m "Update submodules" || echo "(Nothing to commit)"
+    git commit -am "Update submodules"
     git push
     echo "✅ All modules updated."
+    pause
+}
+
+function remove_submodule() {
+    read -rp "Enter submodule folder name (e.g. account_reconcile_oca): " folder_name
+    cd "$REPO_ROOT" || exit
+
+    git submodule deinit -f "oca/$folder_name"
+    rm -rf ".git/modules/oca/$folder_name"
+    rm -rf "oca/$folder_name"
+
+    git add .
+    git commit -m "Remove submodule: $folder_name"
+    git push
+    echo "✅ Submodule removed."
+
+    echo "🔍 Checking for activated modules to clean..."
+    for link in "$ACTIVE_ADDONS"/*; do
+        target=$(readlink "$link")
+        if [[ "$target" == *"$folder_name"* ]]; then
+            echo "Removing symlink: $(basename "$link")"
+            rm "$link"
+        fi
+    done
+    pause
 }
 
 function restart_odoo() {
-    echo "🔁 Restarting Odoo service..."
-    sudo systemctl restart "$ODOO_SERVICE"
+    echo "Restarting Odoo..."
+    sudo systemctl restart odoo
     echo "✅ Odoo restarted."
+    pause
 }
 
 while true; do
-    echo "\n==== Odoo Module Manager ===="
+    clear
+    echo "==== Odoo Module Manager ===="
     echo "1. Add new OCA repo as submodule"
-    echo "2. List available modules"
-    echo "3. Activate a module"
-    echo "4. Update all modules"
-    echo "5. Restart Odoo"
-    echo "6. Exit"
-    echo -n "Choose an option: "
-    read choice
+    echo "2. List available (NOT activated) modules"
+    echo "3. List activated modules"
+    echo "4. Activate a module"
+    echo "5. Update all modules"
+    echo "6. Remove a submodule"
+    echo "7. Restart Odoo"
+    echo "8. Exit"
+    echo "=============================="
+    read -rp "Choose an option [1-8]: " choice
+
     case $choice in
         1) add_submodule ;;
-        2) list_modules ;;
-        3) activate_module ;;
-        4) update_all ;;
-        5) restart_odoo ;;
-        6) echo "Goodbye!"; exit 0 ;;
-        *) echo "Invalid option" ;;
+        2) list_available_modules ;;
+        3) list_activated_modules ;;
+        4) activate_module ;;
+        5) update_all ;;
+        6) remove_submodule ;;
+        7) restart_odoo ;;
+        8) exit 0 ;;
+        *) echo "❌ Invalid option." && pause ;;
     esac
 done
