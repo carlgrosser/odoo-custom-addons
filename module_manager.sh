@@ -83,7 +83,7 @@ function update_all() {
 }
 
 function remove_submodule() {
-    read -rp "Enter submodule folder name (e.g. account_reconcile_oca): " folder_name
+    read -rp "Enter submodule folder name (e.g. account_reconcile): " folder_name
     cd "$REPO_ROOT" || exit
 
     git submodule deinit -f "oca/$folder_name"
